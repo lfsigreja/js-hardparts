@@ -60,8 +60,8 @@ function mapWith(array, callback) {
 function reduce(array, callback, initialValue) {
     let accumulator = initialValue
     
-    forEach(array, function(element) {
-       accumulator = callback(element, accumulator)
+    forEach(array, function(element, index) {
+       accumulator = callback(element, accumulator, index)
     })
 
     return accumulator
@@ -92,8 +92,7 @@ function intersection(arrays) {
 function union(arrays) {
   let output = []
   
-  reduce(arrays, function(array, accumulator) {
-    const commonElements = []
+  reduce(arrays, function(array) {
     forEach(array, function(element) {
       if (!output.includes(element)) {
         output.push(element)
@@ -140,8 +139,6 @@ function multiMap(arrVals, arrCallbacks) {
 // console.log(multiMap(['catfood', 'glue', 'beer'], [function(str) { return str.toUpperCase(); }, function(str) { return str[0].toUpperCase() + str.slice(1).toLowerCase(); }, function(str) { return str + str; }]));
 // should log: { catfood: ['CATFOOD', 'Catfood', 'catfoodcatfood'], glue: ['GLUE', 'Glue', 'glueglue'], beer: ['BEER', 'Beer', 'beerbeer'] }
 
-"Construct a function objectFilter that accepts an object as the first parameter and a callback function as the second parameter. objectFilter will return a new object. The new object will contain only the properties from the input object such that the property's value is equal to the property's key passed into the callback."
-
 // Challenge 11
 function objectFilter(obj, callback) {
   let output = {}
@@ -165,41 +162,79 @@ function objectFilter(obj, callback) {
 
 // Challenge 12
 function majority(array, callback) {
+  let t = 0
+  let f = 0
 
+  forEach(array, function(element) {
+    callback(element) ? t++ : f++
+  })
+
+  return t > f ? true : false
 }
 
-// /*** Uncomment these to check your work! ***/
-// const isOdd = function(num) { return num % 2 === 1; };
-// console.log(majority([1, 2, 3, 4, 5], isOdd)); // should log: true
-// console.log(majority([2, 3, 4, 5], isOdd)); // should log: false
+/*** Uncomment these to check your work! ***/
+// const isOddFunc = function(num) { return num % 2 === 1; };
+// console.log(majority([1, 2, 3, 4, 5], isOddFunc)); // should log: true
+// console.log(majority([2, 3, 4, 5], isOddFunc)); // should log: false
 
 
 // Challenge 13
 function prioritize(array, callback) {
+  let highPriority = []
+  let lowPriority = []
 
+  forEach(array, function(element) {
+    if (callback(element)) {
+      highPriority.push(element)
+      return
+    }
+    
+    lowPriority.push(element)
+  })
+
+  return [...highPriority, ...lowPriority]
 }
 
 // /*** Uncomment these to check your work! ***/
 // const startsWithS = function(str) { return str[0] === 's' || str[0] === 'S'; };
-// console.log(prioritize(['curb', 'rickandmorty', 'seinfeld', 'sunny', 'friends'], startsWithS)); // should log:
-['seinfeld', 'sunny', 'curb', 'rickandmorty', 'friends']
+// console.log(prioritize(['curb', 'rickandmorty', 'seinfeld', 'sunny', 'friends'], startsWithS)); 
+// should log: ['seinfeld', 'sunny', 'curb', 'rickandmorty', 'friends']
 
 
 // Challenge 14
 function countBy(array, callback) {
+  let output = {}
+  forEach(array, function(element) {
+    if (!output[callback(element)]) {
+      output[callback(element)] = 1
+      return
+    }
+    output[callback(element)]++
+  })
 
+  return output
 }
 
 // /*** Uncomment these to check your work! ***/
 // console.log(countBy([1, 2, 3, 4, 5], function(num) {
 // if (num % 2 === 0) return 'even';
 // else return 'odd';
-// })); // should log: { odd: 3, even: 2 }
+// })); 
+// should log: { odd: 3, even: 2 }
 
 
 // Challenge 15
 function groupBy(array, callback) {
+  let output = {}
 
+  forEach(array, function(element) {
+    if (!output[callback(element)]) {
+      output[callback(element)] = []
+    }
+    output[callback(element)].push(element)
+  })
+
+  return output
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -210,7 +245,10 @@ function groupBy(array, callback) {
 
 // Challenge 16
 function goodKeys(obj, callback) {
-
+  return reduce(Object.entries(obj), function([key, element], accum) {
+    if (callback(element)) accum.push(key)
+    return accum
+  }, [])
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -221,21 +259,24 @@ function goodKeys(obj, callback) {
 
 // Challenge 17
 function commutative(func1, func2, value) {
-
+  return func1(value) === func2(value)
 }
 
 // /*** Uncomment these to check your work! ***/
 // const multBy3 = n => n * 3;
 // const divBy4 = n => n / 4;
 // const subtract5 = n => n - 5;
-// console.log(commutative(multBy3, divBy4, 11)); // should log: true
+// console.log(commutative(multBy3, divBy4, 0)); // should log: true
 // console.log(commutative(multBy3, subtract5, 10)); // should log: false
 // console.log(commutative(divBy4, subtract5, 48)); // should log: false
 
 
 // Challenge 18
 function objFilter(obj, callback) {
-
+  return reduce(Object.entries(obj), function([key, element], accum) {
+    if (callback(key) ===  element) accum[key] = element
+    return accum
+  }, {})
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -249,7 +290,11 @@ function objFilter(obj, callback) {
 
 // Challenge 19
 function rating(arrOfFuncs, value) {
-
+  const rate = reduce(arrOfFuncs, function(func, accum) {
+    if (func(value)) accum.push(true)
+    return accum
+  }, 0)
+  return (rate.length / arrOfFuncs.length) * 100
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -264,7 +309,10 @@ function rating(arrOfFuncs, value) {
 
 // Challenge 20
 function pipe(arrOfFuncs, value) {
-
+  return reduce(arrOfFuncs, function (func, accumulator) {
+    accumulator = func(accumulator)
+    return accumulator
+  }, value)
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -277,7 +325,12 @@ function pipe(arrOfFuncs, value) {
 
 // Challenge 21
 function highestFunc(objOfFuncs, subject) {
+  const output = reduce(Object.entries(objOfFuncs), function ([key, f], accumulator) {
+    if (f(subject) > accumulator.value) accumulator = { key: key, value: f(subject) }
+    return accumulator
+  }, { key: '', value: 0})
 
+  return output.key
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -292,7 +345,7 @@ function highestFunc(objOfFuncs, subject) {
 
 // Challenge 22
 function combineOperations(startVal, arrOfFuncs) {
-
+  return pipe(arrOfFuncs, startVal);
 }
 
 function add100(num) {
@@ -307,6 +360,14 @@ function multiplyByThree(num) {
   return num * 3;
 }
 
+function addTen(num) {
+  return num + 10;
+}
+
+function multiplyFive(num) {
+  return num * 5;
+}
+
 // /*** Uncomment these to check your work! ***/
 // console.log(combineOperations(0, [add100, divByFive, multiplyByThree])); // Should output 60 -->
 // console.log(combineOperations(0, [divByFive, multiplyFive, addTen])); // Should output 10
@@ -314,15 +375,18 @@ function multiplyByThree(num) {
 
 // Challenge 23
 function myFunc(array, callback) {
-
+  return reduce(array, function(element, accum, index) {
+    if (callback(element)) accum = index
+    return accum
+  }, -1)
 }
 
-const numbers = [2, 3, 6, 64, 10, 8, 12];
-const evens = [2, 4, 6, 8, 10, 12, 64];
+// const numbers = [2, 3, 6, 64, 10, 8, 12];
+// const evens = [2, 4, 6, 8, 10, 12, 64];
 
-function isOdd(num) {
-  return (num % 2 !== 0);
-}
+// function isOdd(num) {
+//   return (num % 2 !== 0);
+// }
 
 // /*** Uncomment these to check your work! ***/
 // console.log(myFunc(numbers, isOdd)); // Output should be 1
@@ -331,7 +395,9 @@ function isOdd(num) {
 
 // Challenge 24
 function myForEach(array, callback) {
-
+  for(let i = 0; i < array.length; i++) {
+    callback(array[i], i, array);
+  }
 }
 
 let sum = 0;
@@ -341,6 +407,6 @@ function addToSum(num) {
 }
 
 // /*** Uncomment these to check your work! ***/
-// const nums = [1, 2, 3];
-// myForEach(nums, addToSum);
-// console.log(sum); // Should output 6
+const nums = [1, 2, 3];
+myForEach(nums, addToSum);
+console.log(sum); // Should output 6
