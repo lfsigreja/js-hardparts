@@ -1,6 +1,6 @@
 // CHALLENGE 1
 function createFunction() {
-    return () => console.log('hello')
+  return () => console.log('hello')
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -10,7 +10,7 @@ function createFunction() {
 
 // CHALLENGE 2
 function createFunctionPrinter(input) {
-
+  return () => console.log(input)
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -46,10 +46,12 @@ const jasCounter = outer();
 
 
 function addByX(x) {
-
+  const f = (num) => num + x
+	
+  return f
 }
 
-// /*** Uncomment these to check your work! ***/
+// // /*** Uncomment these to check your work! ***/
 // const addByTwo = addByX(2);
 // addByTwo(1); // => should return 3
 // addByTwo(2); // => should return 4
@@ -63,10 +65,26 @@ function addByX(x) {
 // addByFour(4); // => should return 8
 // addByFour(5); // => should return 9
 
+// const addednumber = addByTwo(4)
+// console.log(addednumber)
+
 
 // CHALLENGE 4
 function once(func) {
+  let output;
 
+  function callOnce(x) {
+    if (output) return output
+
+    output = func(x);
+    return output
+  }
+
+  return  callOnce
+}
+
+function addByTwo(num) {
+  return num + 2
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -78,7 +96,14 @@ function once(func) {
 
 // CHALLENGE 5
 function after(count, func) {
+  let timesCalled = 1
 
+  function callAfter() {
+    if (timesCalled === count) func()
+    timesCalled++
+  }
+
+  return callAfter
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -88,16 +113,29 @@ function after(count, func) {
 // afterCalled(); // => nothing is printed
 // afterCalled(); // => 'hello' is printed
 
-
 // CHALLENGE 6
-function delay(func, wait) {
-
+function delay(func, wait, ...arguments) {
+ setTimeout(() => {
+  return func(...arguments);
+ }, wait)
 }
+
+// const cb = function(...params){ console.log("called!", ...params) };
+// delay(cb, 1000); // "called!" printed after 1000 ms
+// delay(cb, 2000, "param1", "param2");
 
 
 // CHALLENGE 7
 function rollCall(names) {
+  function caller() {
+    if (names.length) {
+      console.log(names.shift())
+      return
+    }
 
+    console.log('Everyone accounted for')
+  }
+  return caller;
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -110,7 +148,15 @@ function rollCall(names) {
 
 // CHALLENGE 8
 function saveOutput(func, magicWord) {
+  let output = {}
+  function objectMaker(element) {
+    if (magicWord === element) return output
+    
+    output[element] = func(element)
+    return output[element]
+  }
 
+  return objectMaker
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -123,21 +169,36 @@ function saveOutput(func, magicWord) {
 
 // CHALLENGE 9
 function cycleIterator(array) {
+  let index = 0
+    
+  function next() {
+    const nextElement = array[index % array.length]
+    index++
+    return nextElement
+  }
 
+  return next
 }
 
 // /*** Uncomment these to check your work! ***/
-// const threeDayWeekend = ['Fri', 'Sat', 'Sun'];
+// const threeDayWeekend = ['Fri', 'Sat', 'Sun', 'Mon'];
 // const getDay = cycleIterator(threeDayWeekend);
 // console.log(getDay()); // => should log 'Fri'
 // console.log(getDay()); // => should log 'Sat'
 // console.log(getDay()); // => should log 'Sun'
 // console.log(getDay()); // => should log 'Fri'
+// console.log(getDay())
+// console.log(getDay())
+// console.log(getDay())
 
 
 // CHALLENGE 10
 function defineFirstArg(func, arg) {
+  function argDefiner(...params) {
+    return func(arg, ...params)
+  }
 
+  return argDefiner
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -148,7 +209,13 @@ function defineFirstArg(func, arg) {
 
 // CHALLENGE 11
 function dateStamp(func) {
-
+  function stamp(...params) {
+    return {
+      date: new Date().toDateString(),
+      output: func(...params)
+    }
+  }
+  return stamp
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -159,7 +226,17 @@ function dateStamp(func) {
 
 // CHALLENGE 12
 function censor() {
-
+  let stringSaver = []
+  function wordSwapper(string1, string2) {
+    if (string2) {
+      stringSaver.push({search: string1, replace: string2})
+      return
+    }
+    stringSaver.map(item => string1 = string1.replace(item.search, item.replace))
+    
+     return string1
+  }
+  return wordSwapper
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -171,7 +248,18 @@ function censor() {
 
 // CHALLENGE 13
 function createSecretHolder(secret) {
+  function getSecret() {
+    return console.log(secret)
+  }
 
+  function setSecret(newSecret) {
+    secret = newSecret
+  }
+
+  return {
+    getSecret,
+    setSecret
+  }
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -183,7 +271,13 @@ function createSecretHolder(secret) {
 
 // CHALLENGE 14
 function callTimes() {
+  let timesCalled = 0
+  function callsIterator() {
+    timesCalled++
+    console.log(timesCalled)
+  }
 
+  return callsIterator
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -197,7 +291,22 @@ function callTimes() {
 
 // CHALLENGE 15
 function roulette(num) {
+  let timesRolled = 0
+  function roll() {
+    if ((num - 1) > timesRolled) {
+      timesRolled++
+      return 'spin'
+    }
 
+    if ((num - 1) === timesRolled) { 
+      timesRolled++
+      return 'win'
+    }
+
+    return 'pick a number to play again'
+  }
+
+  return roll
 }
 
 // /*** Uncomment these to check your work! ***/
@@ -211,17 +320,30 @@ function roulette(num) {
 
 // CHALLENGE 16
 function average() {
+  let nums = []
+  function add(num) {
+    if (num) { 
+      nums.push(num)
+    }
 
+    let avg = 0
+    if (nums.length) {
+      avg = nums.reduce((acc, curr) => acc + curr, 0) / nums.length
+    }
+    return avg
+  }
+
+  return add
 }
 
 // /*** Uncomment these to check your work! ***/
-// const avgSoFar = average();
-// console.log(avgSoFar()); // => should log 0
-// console.log(avgSoFar(4)); // => should log 4
-// console.log(avgSoFar(8)); // => should log 6
-// console.log(avgSoFar()); // => should log 6
-// console.log(avgSoFar(12)); // => should log 8
-// console.log(avgSoFar()); // => should log 8
+const avgSoFar = average();
+console.log(avgSoFar()); // => should log 0
+console.log(avgSoFar(4)); // => should log 4
+console.log(avgSoFar(8)); // => should log 6
+console.log(avgSoFar()); // => should log 6
+console.log(avgSoFar(12)); // => should log 8
+console.log(avgSoFar()); // => should log 8
 
 
 // CHALLENGE 17
